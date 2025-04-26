@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Filename: gen.js
 // Run with: node/bun gen.js
 // or `chmod +x gen.js` then `./gen.js`
