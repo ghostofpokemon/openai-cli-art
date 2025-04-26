@@ -84,7 +84,7 @@ let imageSize = "auto"; // <--- CHANGE ME
 const baseFilename = "generated_output";
 // Default output directory is the folder you run the command from.
 // If you prefer a fixed directory, uncomment the next line and set it.
-// const outputDir = "/absolute/path/to/your/preferred/folder";
+// let outputDir = "/absolute/path/to/your/preferred/folder";
 let outputDir = process.cwd();
 
 // ------------------ CLI ARG PARSING ------------------
