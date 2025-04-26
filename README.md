@@ -96,6 +96,23 @@ You can override the defaults set inside the script using these command-line fla
 *   [prompt]
     *   Any text arguments *not* captured by the flags above are joined together to form the prompt. If your prompt has spaces, wrap it in quotes: `"like this example prompt"`. If you don't provide a prompt via flags, it uses the default one inside the script (currently: `Ghibli it`).
 
+
+You can tweak the output using these command-line flags. Defaults are listed below if you don't specify.
+
+| Flag             | Alias | Description                                                                      | Default         | Example                                         |
+| :--------------- | :---- | :------------------------------------------------------------------------------- | :-------------- | :---------------------------------------------- |
+| `PROMPT`         |       | Your text prompt (any non-flag arguments get joined into the prompt)             | `"Ghibli it"`   | `gen "Cyberpunk ramen shop"`                    |
+| `--model`        | `-M`  | Which OpenAI model to use (`gpt-image-1`, `dall-e-2`, `dall-e-3`)                | `gpt-image-1`   | `gen -M dall-e-3 "prompt"`                      |
+| `--quality`      | `-q`  | Image quality (`low`, `medium`, `high`, `auto`). Availability depends on model.  | `auto`          | `gen -q high "prompt"`                          |
+| `--size`         | `-s`  | Image dimensions (`square`, `portrait`, `landscape`, `auto`, or specific sizes like `1024x1024`). Availability depends on model. | `auto`          | `gen -s landscape "prompt"`                     |
+| `--number`       | `-n`  | How many images to generate (API currently often returns 1 regardless for DALL-E 3/GPT-Image). | `1`             | `gen -n 4 "prompt"`                             |
+| `--format`       | `-f`  | Output image format (`png`, `jpeg`, `webp`).                                     | `png`           | `gen -f jpeg "prompt"`                          |
+| `--compression`  | `-c`  | Compression level (0-100) for `jpeg` and `webp` formats.                         | `null` (none)   | `gen -f webp -c 75 "prompt"`                    |
+| `--output`       | `-o`  | Directory to save the image(s) in.                                               | Current dir (`.`) | `gen -o ~/Pictures/ai "prompt"`               |
+| `--input`        | `-i`  | Path to input image(s) for editing mode.                                         | None            | `gen -i my_face.png "add a cool hat"`           |
+| `--mask`         | `-m`  | Path to a mask image (PNG) for editing mode (transparent areas are edited).      | None            | `gen -i bg.png -m mask.png "fill sky with stars"` |
+| `--transparent`  | `-t`  | Make the background transparent (requires `png` or `webp` format).                 | `false`         | `gen -f png -t "a floating icon"`               |
+
 **Defaults (if you don't use flags):**
 
 *   Quality: `auto`
