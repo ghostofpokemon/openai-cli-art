@@ -254,7 +254,7 @@ async function createImage() {
             n: numImages,
             size: imageSize,
             quality: imageQuality,
-            format: outputFormat,
+            output_format: outputFormat,
             moderation: "low", // Default to the least-restrictive moderation
         };
 
