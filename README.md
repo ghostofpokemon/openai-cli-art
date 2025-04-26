@@ -80,7 +80,7 @@ Here's the control panel. Defaults are shown. Mix and match 'em.
 | `--output`      | `-o`  | Where to dump the resulting file(s). Creates the dir if it doesn't exist (usually).                            | Current dir (`.`) | `gen -o ~/Downloads/ai_junk "prompt"`                |
 | `--input/image(s)`       | `-i`  | Input image path(s) for editing mode. Give it something to mess up.                                           | None            | `gen -i dog.png "make the dog blue"`                 |
 | `--mask`        | `-m`  | Mask image path (PNG) for editing. Must match input size. Transparent areas get the AI treatment.             | None            | `gen -i photo.png -m face_mask.png "add mustache"`   |
-| `--transparent` | `-t`  | Generate with a clear background? Needs `-f png` or `-f webp`. Doesn't work with editing (`-i`).             | `false`         | `gen -f png -t "a cool logo"`                        |
+| `--transparent` | `-t`  | Generate with a clear background? Needs `-f png` or `-f webp`.             | `false`         | `gen -f png -t "a cool logo"`                        |
 
 **Putting it all together:**
 

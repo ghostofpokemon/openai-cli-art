@@ -212,7 +212,7 @@ if (leftoverTokens.length) {
 
 if (inputImagePaths.length) console.log(`Input images: ${inputImagePaths.join(", ")}`);
 if (maskImagePath) console.log(`Mask image provided:  ${maskImagePath}`);
-if (enableTransparency) console.log("Transparency enabled (background=transparent)");
+console.log(`Transparency ${enableTransparency ? "enabled (background=transparent)" : "disabled"}`);
 console.log(`Image quality set to '${imageQuality}'`);
 console.log(`Image size set to '${imageSize}'`);
 console.log(`Model: ${modelName}`);
@@ -276,13 +276,14 @@ async function createImage() {
         // --- Cost Estimation ---
         const sizeKeyForPricing = imageSize === "auto" ? "1024x1024" : imageSize; // rough default
         let unitPrice = null;
+        let estCost = null;
         const priceTable = pricing[modelName]?.[imageQuality];
         if (priceTable && priceTable[sizeKeyForPricing]) {
             unitPrice = priceTable[sizeKeyForPricing];
+            estCost = unitPrice * numImages;
         }
 
         if (unitPrice !== null) {
-            const estCost = unitPrice * numImages;
             console.log(`Estimated cost: $${estCost.toFixed(3)} (${numImages} x $${unitPrice})`);
         } else {
             console.log("Estimated cost: (unknown for this model/size/quality combination)");
@@ -334,7 +335,11 @@ async function createImage() {
         fs.writeFileSync(outputFilename, image_bytes);
 
         console.log(`\nSuccess! Image saved. Go check out ${outputFilename}`);
-        console.log(`It cost approximately some tokens. Check your dashboard if you care.`);
+        if (unitPrice !== null) {
+            console.log(`Estimated cost: $${estCost.toFixed(3)} (${numImages} x $${unitPrice}). Check your dashboard for the real cost.`);
+        } else {
+            console.log("Estimated cost: (unknown for this model/size/quality combination). Check your dashboard.");
+        }
 
         // -------------------------------------------------------------
         // OPTIONAL: Preview the image in iTerm2 using "imgcat".
