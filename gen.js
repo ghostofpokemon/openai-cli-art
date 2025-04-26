@@ -2,6 +2,7 @@
 // Filename: gen.js
 // Run with: node/bun gen.js
 // or `chmod +x gen.js` then `./gen.js`
+// OR export PATH="$PATH:$(pwd)" and then just `gen`
 
 import OpenAI, { toFile } from "openai";
 import fs from "fs";

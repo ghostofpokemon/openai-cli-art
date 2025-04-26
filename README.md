@@ -1,157 +1,118 @@
-## `gen.js` - Your Pocket-Sized AI Art Slave
+## `gen.js` - Image gen in the CLI
 
 *(Because clicking buttons is for plebs)*
 
-This thing lets you generate or edit images using OpenAI's magic from your command line. Runs on plain **Node.js** or **Bun** (Bun is faster but totally optional).
+So, you're back. Good. This thing lets you generate or edit images using OpenAI's *fancy* `gpt-image-1`, DALL·E 2 or DALL·E 3 from your command line. Runs on plain **Node.js** or **Bun** (Bun is faster but totally optional. Chage the shebang at the top from `#!/usr/bin/env node` to `#!/usr/bin/env bun`)
+
+Generate, edit, make things transparent, choose your poison. It's pretty straightforward, but powerful enough to get weird with.
+
+## Features
+
+*   Generate images straight from your command line.
+*   Edit existing images using masks (inpainting/outpainting vibes).
+*   Supports `gpt-image-1`, `dall-e-2`, and `dall-e-3` models.
+*   Control quality, size, format, and number of images via flags.
+*   Optional image preview *directly in your terminal* if you're rockin' iTerm2 on macOS. Pretty slick, right?
+*   Tells you roughly how much your digital dreams might cost (check your OpenAI dashboard for the real numbers, though).
 
 ### Prerequisites (The Annoying Stuff)
 
-1.  **Runtime:** Either
-    * **Node.js 18+** (recommended for universal compatibility), or
-    * **Bun** if you want extra speed: <https://bun.sh/>
-2.  **OpenAI API Key:** Yeah, this costs monies. Get a key from OpenAI and set it as an environment variable. The script looks for `OPENAI_API_KEY`.
+1.  **Runtime:** This baby now runs on **Node.js** (grab it: [https://nodejs.org/](https://nodejs.org/)) OR **Bun** if you want extra speed (grab it: [https://bun.sh/](https://bun.sh/)). Your choice. The shebang `#!/usr/bin/env bun` at the top *prefers* Bun if you run it directly (`./gen.js`), but `node gen.js` works fine too. Pick your speed demon.
+2.  **OpenAI API Key:** this cost monies (gpt-image-1 'low' square images are $0.011 and 'high' portrait / landscape run $0.25). Get a key from OpenAI and set it as an environment variable. The script looks for `OPENAI_API_KEY`. Seriously, don't paste it into the script like an amateur.
     ```bash
-    # Put this in your .zshrc, .bashrc, .bash_profile, or whatever your shell uses
-    export OPENAI_API_KEY='sk-YourSuperSecretKeyGoesHereDude'
+    # In your .zshrc, .bashrc, .profile, wherever your shell uses
+    export OPENAI_API_KEY='sk-YourSecretKeyIsProbablyNotThisSecure'
     # Then reload your shell or open a new terminal
     ```
-    Don't come crying to me if you forget this. My predictive models on user error are already running hot.
 
-### Setup (Making it Usable Without Typing So Damn Much)
+### Setup (Making It Feel Like a Real Command)
 
-1.  **Download the Script:** You've already got it, presumably named `gen.js`. Smart move.
-2.  **Make it Executable:** Tell your terminal it's allowed to run this thing.
+Got the script (`gen.js`)? Good. Let's make it less of a chore to run.
+
+1.  **Grant Execution Powers:**
     ```bash
     chmod +x gen.js
     ```
-    Now it feels powerful. Or at least runnable.
-3.  **Put it in Your PATH (Optional, but cool):** Wanna run this from anywhere like `ls` or `cd`? Of course you do. Use a symbolic link. You'll likely need `sudo` because `/usr/local/bin` is usually protected.
+2.  **(Highly Recommended) Put it in Your PATH:**
+    Symbolic link time. Needs `sudo` usually.
     ```bash
-    # Make sure you are IN THE SAME DIRECTORY as gen.js when you run this
+    # Make sure you\'re IN THE FOLDER where gen.js lives when you run this!
     sudo ln -s "$PWD/gen.js" /usr/local/bin/gen
     ```
-    *   `$PWD/gen.js`: This automatically gets the full path to `gen.js` in your current directory. Neat, huh?
-    *   `/usr/local/bin/gen`: This is where the link goes, and `gen` is the command name you'll use.
 
-    **Wanna call it something else?** Fine, be difficult. If you renamed the script to `image_wizard.js` and want to call the command `wiz`, you'd do:
-    ```bash
-    # Assuming your script is now called image_wizard.js
-    chmod +x image_wizard.js
-    sudo ln -s "$PWD/image_wizard.js" /usr/local/bin/wiz
-    ```
-    See? You can name the command (`wiz` in this case) whatever the hell you want. Just make sure the *first* path points to the actual script file.
+    *   **Want a different name?** Change `gen` at the end to whatever floats your boat. `art`, `image-gen`, `painter`
+        ```bash
+        # Example: Call it 'art'
+        sudo ln -s "$PWD/gen.js" /usr/local/bin/art
+        ```
+    Now you can summon art from anywhere.
 
-### Usage (The Fun Part)
+### Usage
 
-Once it's set up and in your path (or if you just run it directly with `node gen.js` or `bun run gen.js`), you can do stuff like this:
-
-**Basic Generation:**
+It's simple, really. Run the command, give it flags (see below), and then type your weird-ass prompt.
 
 ```bash
-# Using the command name 'gen' we set up
-gen "a hyperrealistic photo of a cat riding a unicorn on the moon"
+# Using the linked command 'gen'
+gen "A photorealistic toaster oven contemplating the futility of existence"
 
-# Or if you didn't add it to PATH (Node or Bun)
-node gen.js "a synthwave sunset over a city made of cheese"
-# or
-bun run gen.js "a synthwave sunset over a city made of cheese"
+# If you didn't link it, using Bun
+bun run gen.js "Synthwave landscape made entirely of sentient gummy bears"
 
-# Or using the shebang directly (if you did the chmod +x)
-./gen.js "pixel art of a grumpy potato programmer"
+# Or using Node
+node gen.js "A charcoal sketch of a dog wearing VR goggles, looking confused"
 ```
 
-**Editing an Existing Image:**
+Any text that isn't a flag or its argument gets mashed together to become the prompt. Use quotes `"like this"` if your prompt has spaces.
+
+### Flags - All The Levers You Can Pull
+
+Here's the control panel. Defaults are shown. Mix and match 'em.
+
+| Flag            | Alias | Description                                                                                                   | Default         | Example                                              |
+| :-------------- | :---- | :------------------------------------------------------------------------------------------------------------ | :-------------- | :--------------------------------------------------- |
+| `[PROMPT]`      |       | Your brilliant (or moronic) text prompt. Comes after all flags.                                               | `"Ghibli it"`   | `gen "A cat discovering fire"`                       |
+| `--model`       | `-M`  | Which brain to use? (`gpt-image-1`, `dall-e-3`, `dall-e-2`). `gpt-image-1` is sharp but needs verification (see below). | `gpt-image-1`   | `gen -M dall-e-3 "prompt"`                           |
+| `--quality`     | `-q`  | How fancy? (`low`, `medium`, `high`, `auto`). Availability varies by model. DALL-E 3 ignores `low`/`medium`.   | `auto`          | `gen -q high "prompt"`                               |
+| `--size`        | `-s`  | Shape & pixels (`square`, `portrait`, `landscape`, `auto`, or `1024x1024`, etc.). Check OpenAI docs for model limits. | `auto`          | `gen -s landscape "prompt"`                          |
+| `--number`      | `-n`  | How many pics? (Note: DALL-E 3 / `gpt-image-1` often ignore this and just give 1. Don't ask me why.)              | `1`             | `gen -n 2 "prompt"`                                  |
+| `--format`      | `-f`  | File type (`png`, `jpeg`, `webp`). Pick your flavor.                                                          | `png`           | `gen -f webp "prompt"`                               |
+| `--compression` | `-c`  | Squeeze level (0-100) for `jpeg`/`webp`. Higher = smaller file, crappier image. Only use with `-f jpeg/webp`. | `null` (off)    | `gen -f jpeg -c 80 "prompt"`                         |
+| `--output`      | `-o`  | Where to dump the resulting file(s). Creates the dir if it doesn't exist (usually).                            | Current dir (`.`) | `gen -o ~/Downloads/ai_junk "prompt"`                |
+| `--input`       | `-i`  | Input image path(s) for editing mode. Give it something to mess up.                                           | None            | `gen -i dog.png "make the dog blue"`                 |
+| `--mask`        | `-m`  | Mask image path (PNG) for editing. Must match input size. Transparent areas get the AI treatment.             | None            | `gen -i photo.png -m face_mask.png "add mustache"`   |
+| `--transparent` | `-t`  | Generate with a clear background? Needs `-f png` or `-f webp`. Doesn't work with editing (`-i`).             | `false`         | `gen -f png -t "a cool logo"`                        |
+
+**Putting it all together:**
 
 ```bash
-# Provide input image, mask (optional), and prompt
-gen -i cool_robot.png -m robot_head_mask.png "give the robot a fancy top hat"
+# Generate 2 high-quality, landscape DALL-E 3 images as JPEGs, save in '~/ai_art'
+gen -M dall-e-3 -q high -s landscape -n 2 -f jpeg -o ~/ai_art "An otter playing a flaming saxophone in space"
 
-# Input image only (implies you want variations or major changes based on prompt)
-gen -i landscape.png "make this landscape look like a watercolor painting"
+# Edit 'cat.png' using 'cat_mask.png', make the background transparent (won't work!), save as webp
+# Note: -t is ignored in edit mode, but we try anyway for shits and giggles. Output is webp.
+gen -i cat.png -m cat_mask.png -f webp -c 60 "replace background with a cyberpunk city"
 ```
 
-The script dumps the generated PNG file in your current directory (or where specified by `-o`) with a filename like `generated_output_auto_auto_1678886400000.png`. Yeah, it includes the quality, size, and a timestamp so you don't overwrite your masterpieces.
+### IMPORTANT: Using `gpt-image-1` (The "Good" Model)
 
-### Flags and Options (Controlling the Chaos)
+Listen up. OpenAI wants to make sure you're not using their shiniest new toy, `gpt-image-1`, for nefarious purposes (or maybe they just want your data, who knows?). To use this model, you might need to **verify your OpenAI organization**. It's a one-time thing.
 
-You can override the defaults set inside the script using these command-line flags:
+As OpenAI puts it: *"To ensure this model is used responsibly, you may need to complete the API Organization Verification from your developer console before using gpt-image-1."*
 
-*   `-i <path>`, `--input <path>`
-    *   Path to an input PNG image for editing/variations.
-*   `-m <path>`, `--mask <path>`
-    *   Path to a mask PNG image (must be same size as input). White areas are kept, transparent areas are where the AI does its thing. Used with `-i`.
-*   `-q <level>`, `--quality <level>`
-    *   Image quality. Options: `low`, `medium`, `high`, `auto` (default).
-    *   `low`: Fastest, cheapest, potentially crap.
-    *   `medium`: Decent balance.
-    *   `high`: Slowest, costs more, looks prettier (usually).
-    *   `auto`: The model tries to guess based on the prompt, size, etc. Sometimes it nails it, sometimes... not so much.
-*   `-s <size>`, `--size <size>`
-    *   Image dimensions. Options: `square` (1024x1024), `portrait` (1024x1536), `landscape` (1536x1024), `auto` (default). You can also use the raw pixel values like `1024x1024`.
-    *   `auto`: Tries to pick a size. Good luck.
-*   `-t`, `--transparent`
-    *   Generate the image with a transparent background. Doesn't work with `-i` (image editing). Useful for slapping your creations onto other things.
-*   `-o <dir>`, `--output <dir>`
-    *   Specify a directory where the output image should be saved. If the directory doesn't exist, the script is smart enough to try and create it. Example: `-o ~/Pictures/AI_Doodles`
-*   [prompt]
-    *   Any text arguments *not* captured by the flags above are joined together to form the prompt. If your prompt has spaces, wrap it in quotes: `"like this example prompt"`. If you don't provide a prompt via flags, it uses the default one inside the script (currently: `Ghibli it`).
+**Where to go:** [https://platform.openai.com/settings/organization/general](https://platform.openai.com/settings/organization/general)
+Click the "Verify Organization" button and follow their steps. If you don't, requests using `-M gpt-image-1` might just fail with some cryptic error.
 
+### ✨ Bonus: iTerm2 Inline Preview ✨
 
-You can tweak the output using these command-line flags. Defaults are listed below if you don't specify.
+Yeah, yeah, the cool trick for **macOS + iTerm2** users is still here. See the generated image right in your terminal like you're living in the future.
 
-| Flag             | Alias | Description                                                                      | Default         | Example                                         |
-| :--------------- | :---- | :------------------------------------------------------------------------------- | :-------------- | :---------------------------------------------- |
-| `PROMPT`         |       | Your text prompt (any non-flag arguments get joined into the prompt)             | `"Ghibli it"`   | `gen "Cyberpunk ramen shop"`                    |
-| `--model`        | `-M`  | Which OpenAI model to use (`gpt-image-1`, `dall-e-2`, `dall-e-3`)                | `gpt-image-1`   | `gen -M dall-e-3 "prompt"`                      |
-| `--quality`      | `-q`  | Image quality (`low`, `medium`, `high`, `auto`). Availability depends on model.  | `auto`          | `gen -q high "prompt"`                          |
-| `--size`         | `-s`  | Image dimensions (`square`, `portrait`, `landscape`, `auto`, or specific sizes like `1024x1024`). Availability depends on model. | `auto`          | `gen -s landscape "prompt"`                     |
-| `--number`       | `-n`  | How many images to generate (API currently often returns 1 regardless for DALL-E 3/GPT-Image). | `1`             | `gen -n 4 "prompt"`                             |
-| `--format`       | `-f`  | Output image format (`png`, `jpeg`, `webp`).                                     | `png`           | `gen -f jpeg "prompt"`                          |
-| `--compression`  | `-c`  | Compression level (0-100) for `jpeg` and `webp` formats.                         | `null` (none)   | `gen -f webp -c 75 "prompt"`                    |
-| `--output`       | `-o`  | Directory to save the image(s) in.                                               | Current dir (`.`) | `gen -o ~/Pictures/ai "prompt"`               |
-| `--input`        | `-i`  | Path to input image(s) for editing mode.                                         | None            | `gen -i my_face.png "add a cool hat"`           |
-| `--mask`         | `-m`  | Path to a mask image (PNG) for editing mode (transparent areas are edited).      | None            | `gen -i bg.png -m mask.png "fill sky with stars"` |
-| `--transparent`  | `-t`  | Make the background transparent (requires `png` or `webp` format).                 | `false`         | `gen -f png -t "a floating icon"`               |
+1.  **Edit `gen.js`**.
+2.  **Uncomment the `import { execSync } ...` line** near the top. Delete the `//`.
+3.  **Uncomment the `if (process.env.TERM_PROGRAM === "iTerm.app") { ... }` block** near the end of the `createImage` function. Delete the `//` lines around and inside it.
+4.  **Save**.
 
-**Defaults (if you don't use flags):**
+Requires `imgcat` which comes with iTerm2's Shell Integration (install it from the iTerm2 menu if you haven't). If it bitches about `imgcat` not found, well, figure it out. My processors are busy.
 
-*   Quality: `auto`
-*   Size: `auto`
-*   Prompt: Whatever is set inside the script (change it there if you want a different default).
+### A Word on Cost (AKA Digital Dollars Disappearing)
 
-### ✨ Bonus Feature: iTerm2 Inline Image Preview ✨
-
-Using **macOS** and the **iTerm2** terminal? Lucky you. You can uncomment a few lines in the script to have the generated image pop up *right in your terminal* after it's saved. Because who has time to `open .`?
-
-1.  **Edit the script** (`gen.js` or whatever you called it).
-2.  **Uncomment the import:** Near the top, find this line and remove the `//`:
-    ```javascript
-    // import { execSync } from "child_process";
-    ```
-    Change it to:
-    ```javascript
-    import { execSync } from "child_process";
-    ```
-3.  **Uncomment the preview block:** Scroll way down towards the end of the `createImage` function. Find this block and uncomment the relevant lines:
-    ```javascript
-    // if (process.env.TERM_PROGRAM === "iTerm.app") {
-    //     try {
-    //         execSync(`imgcat "${outputFilename}"`, { stdio: "inherit" });
-    //     } catch (_) {
-    //         console.warn("imgcat command failed – is iTerm shell integration installed?");
-    //     }
-    // }
-    ```
-    Change it to:
-    ```javascript
-    if (process.env.TERM_PROGRAM === "iTerm.app") {
-        try {
-            execSync(`imgcat "${outputFilename}"`, { stdio: "inherit" });
-        } catch (_) {
-            console.warn("imgcat command failed – is iTerm shell integration installed?");
-        }
-    }
-    ```
-4.  **Save the script.**
-
-Now, when the script successfully generates an image *and* you're running it inside iTerm2 (and have shell integration or `imgcat` installed), it should display the image. If it complains about `imgcat`, you might need to install iTerm2's shell integration properly. Google it, I'm busy contemplating the heat death of the universe.
+The script now takes a wild guess at the token cost. It prints something like `Estimated cost: Roughly X tokens`. **THIS IS AN ESTIMATE.** OpenAI's pricing can be weird, models change, maybe the API sneezed. Always, *always* check your **OpenAI Billing Dashboard** for the actual damage to your wallet. Don't come crying to me when your "quick test" turns into a $50 oopsie because you generated 100 high-res images of eldritch horrors.
